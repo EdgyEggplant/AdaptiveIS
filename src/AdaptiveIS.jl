@@ -2,8 +2,7 @@ __precompile__()
 
 module AdaptiveIS
 
-using Distributions
-using Plots
+using Distributions, Plots
 
 export ais_type, show, ais, plot, plot!
 
