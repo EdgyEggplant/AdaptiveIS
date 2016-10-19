@@ -1,4 +1,5 @@
-﻿module AdaptiveIS
+__precompile__()
+module AdaptiveIS
 
 using Distributions
 
