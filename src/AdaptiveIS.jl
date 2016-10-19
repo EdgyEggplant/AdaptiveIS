@@ -83,7 +83,7 @@ type ais_type
 end
 
 function Base.show(io::IO, ais::ais_type)
-    print(io, "Terminal values: μ=$(ais.μ[end]), θbar=$(ais.θ[end,:])")
+    print(io, "Terminal values: μ=$(ais.μ[end]), θ=$(ais.θ[end,:])")
 end
 
 """
