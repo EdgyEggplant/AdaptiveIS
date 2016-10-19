@@ -77,7 +77,7 @@ function Base.show(io::IO, ais::ais_type)
 end
 
 """
-ais(f::Function,d::Int64;<keyword arguments>)
+    ais(f::Function,d::Int64;<keyword arguments>)
 
 Approximate the expected value of `f` whose domain is the `d`-dimensional hypercube
 using adaptive importance sampling, where the importance sampling parameter is updated
