@@ -1,6 +1,11 @@
+__precompile__()
+
 module AdaptiveIS
 
-export g,ginv,h,gh,r,gn,maxd,points,maxl,t,gq,saa,ais_type,Base.show,ais,Plots.plot,Plots.plot!
+using Distributions
+using Plots
+
+export g, ginv, h, gh, r, gn, maxd, points, maxl, t, gq, saa, ais_type, show, ais, plot, plot!
 
 g(z::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})=cdf(Normal(),z-t).*(1.-t0)+exp(-t.*z).*t0
 
