@@ -1,6 +1,5 @@
 module AdaptiveIS
 
-using Distributions,Plots
 export g,ginv,h,gh,r,gn,maxd,points,maxl,t,gq,saa,ais_type,Base.show,ais,Plots.plot,Plots.plot!
 
 g(z::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})=cdf(Normal(),z-t).*(1.-t0)+exp(-t.*z).*t0
