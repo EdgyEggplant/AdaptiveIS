@@ -1,9 +1,11 @@
-using AdaptiveIS
+using AdaptiveIS, Base.Test
 
 f(x)=mean(x)>=0.85 ? 1. : 0.
 srand(5)
-sim=ais(f,3)
+sim=ais(f,3,t0=[1;0;1],accel="saa")
 
-@test_approx_eq sim.¦Ì 0.015014809526721174
+@test_approx_eq sim.Î¼ 0.015348602479358703
 
-@test_approx_eq sim.¦È [0.226725, 0.234437, 0.230236]
+@test_approx_eq sim.Î¸ [1.37287, 0.436164, 1.37691]
+
+@test_apprxo_eq sim.Î» [1.5, 0.5, 1.5]
