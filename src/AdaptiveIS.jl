@@ -117,7 +117,7 @@ arguments are "`none`", "`directsub`", "`sa`", and "`saa`".
 
 # Examples
 ```jldoctest
-julia> using Distributions
+julia> using AdaptiveIS
 julia> f(x)=mean(x)>=0.85 ? 1. : 0.
 julia> srand(5)
 julia> ais(f,3)
