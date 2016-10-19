@@ -5,7 +5,7 @@ module AdaptiveIS
 using Distributions
 using Plots
 
-export g, ginv, h, gh, r, gn, maxd, points, maxl, t, gq, saa, ais_type, show, ais, plot, plot!
+export ais_type, show, ais, plot, plot!
 
 g(z::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})=cdf(Normal(),z-t).*(1.-t0)+exp(-t.*z).*t0
 
@@ -19,10 +19,6 @@ r(u::Vector{Float64},t::Vector{Float64},f::Function,t0::Vector{Float64})=f(g(gin
 
 gn(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},f::Function,t0::Vector{Float64})=f(g(ginv(u,l,t0),t0,t0))^2*gh(u,t,l,t0)*h(u,l,l,t0)
 
-"""
-Compute the maximal distance between the input and any other point in the domain of
-the importance sampling parameter.
-"""
 function maxd(t::Vector{Float64},lb::Vector{Float64},ub::Vector{Float64})
     d=length(t)
     corner=zeros(d)
@@ -30,10 +26,6 @@ function maxd(t::Vector{Float64},lb::Vector{Float64},ub::Vector{Float64})
     return(norm(t-corner))
 end
 
-"""
-Construct a matrix whose columns are the points of the discretised domain of the
-importance sampling parameter.
-"""
 function points(lb::Vector{Float64},ub::Vector{Float64},npart::Int64)
     d=length(lb)
     pts=zeros(d,npart^d)
@@ -41,7 +33,6 @@ function points(lb::Vector{Float64},ub::Vector{Float64},npart::Int64)
     return(pts)
 end
 
-"Approximate the maximal L2-norm of the estimator of the gradient of the variance."
 function maxl(l::Vector{Float64},lb::Vector{Float64},ub::Vector{Float64},npart::Int64,sampsize::Int64,f::Function,t0::Vector{Float64})
     d=length(l)
     pts=points(lb,ub,npart)
@@ -60,7 +51,6 @@ t(z::Vector{Float64},t0::Vector{Float64})=z.*(1.-t0)-z.*t0
 
 gq(l::Vector{Float64},t0::Vector{Float64})=-l.*(1.-t0)+1./(l+1e-5).*t0
 
-"Choose λ via sample average approximation."
 function saa(u::Vector{Float64},lb::Vector{Float64},ub::Vector{Float64},npart::Int64,f::Function,t0::Vector{Float64})
     d=length(u)
     pts=points(lb,ub,npart)
