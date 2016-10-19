@@ -115,7 +115,7 @@ accelerate the Monte Carlo simulation, and if so, the method of choosing the aux
 parameter. Useful when the function `f` is zero with a high probability. Accepted
 arguments are "`none`", "`directsub`", "`sa`", and "`saa`".
 
-# Examples
+# Example
 ```jldoctest
 julia> using AdaptiveIS
 julia> f(x)=mean(x)>=0.85 ? 1. : 0.
