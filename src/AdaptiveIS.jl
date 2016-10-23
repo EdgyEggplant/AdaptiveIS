@@ -270,7 +270,7 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
             θ[i+1]=min(max(θ[i]-step*f(u)^2*gh2(u,θ[i],t0,t0),lb),ub)
         end
         μ=cumsum(rsamp)./(1:n)
-        θbar=cumsum(θ[1:n])./(1:n)
+        θbar=repmat(cumsum(θ[1:n])./(1:n),1,1)
         return(ais_type(μ,θbar,t0))
         
     elseif accel=="directsub" || accel=="sa" || accel=="saa"
@@ -305,7 +305,7 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
             θ[i+1]=min(max(θ[i]-step*gn2(u,θ[i],λ,f,t0),lb),ub)
         end
         μ=cumsum(rsamp)./(1:n)
-        θbar=vcat(t0*ones(tau),cumsum(θ[tau+1:n])./(1:n-tau))
+        θbar=repmat(vcat(t0*ones(tau),cumsum(θ[tau+1:n])./(1:n-tau)),1,1)
         return(ais_type(μ,θbar,λ))
         
     else
