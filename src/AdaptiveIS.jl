@@ -4,7 +4,7 @@ module AdaptiveIS
 
 using Distributions, Plots
 
-export ais_type, show, ais, plot, plot!, aishd
+export ais_type, show, ais, plot, plot!
 
 g(z::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})=cdf(Normal(),z-t).*(1.-t0)+exp(-t.*z).*t0
 g2(z::Vector{Float64},t::Float64,t0::Float64)=cdf(Normal(),z-t)*(1.-t0)+exp(-t*z)*t0
