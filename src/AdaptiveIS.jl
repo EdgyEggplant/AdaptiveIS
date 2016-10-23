@@ -271,7 +271,7 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
         end
         μ=cumsum(rsamp)./(1:n)
         θbar=repmat(cumsum(θ[1:n])./(1:n),1,1)
-        return(ais_type(μ,θbar,t0))
+        return(ais_type(μ,θbar,ones(1)*t0))
         
     elseif accel=="directsub" || accel=="sa" || accel=="saa"
         tau=0
@@ -286,7 +286,7 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
         end
         if tau==n
             μ=cumsum(rsamp)./(1:n)
-            return(ais_type(μ,θ[1:n],t0))
+            return(ais_type(μ,repmat(θ[1:n],1,1),ones(1)*t0))
         end
         θ[tau+1]=min(max(t0-temp^2*gh2(u,t0,t0,t0)/tau^0.7,lb),ub)
         newt0=mean(θ[1:tau+1])
@@ -306,7 +306,7 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
         end
         μ=cumsum(rsamp)./(1:n)
         θbar=repmat(vcat(t0*ones(tau),cumsum(θ[tau+1:n])./(1:n-tau)),1,1)
-        return(ais_type(μ,θbar,λ))
+        return(ais_type(μ,θbar,ones(1)*λ))
         
     else
         error("The acceleration method specified is not valid. Choose from none, directsub, sa, and saa.")
