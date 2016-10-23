@@ -81,7 +81,7 @@ end
 function saa2(u::Vector{Float64},lb::Float64,ub::Float64,npart::Int64,f::Function,t0::Float64)
     pts=linspace(lb,ub,npart)
     samp=zeros(npart)
-    [samp[i]=h(u,pts[i],t0,t0) for i=1:npart]
+    [samp[i]=h2(u,pts[i],t0,t0) for i=1:npart]
     return(pts[findmin(samp)[2]])
 end
 
