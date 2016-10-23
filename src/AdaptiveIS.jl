@@ -4,19 +4,25 @@ module AdaptiveIS
 
 using Distributions, Plots
 
-export ais_type, show, ais, plot, plot!
+export ais_type, show, ais, plot, plot!, aishd
 
 g(z::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})=cdf(Normal(),z-t).*(1.-t0)+exp(-t.*z).*t0
+g2(z::Vector{Float64},t::Float64,t0::Float64)=cdf(Normal(),z-t)*(1.-t0)+exp(-t*z)*t0
 
 ginv(u::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})=(quantile(Normal(),u)+t).*(1.-t0)+(-log(u)./(t+1e-5)).*t0
+ginv2(u::Vector{Float64},t::Float64,t0::Float64)=(quantile(Normal(),u)+t)*(1.-t0)+(-log(u)/(t+1e-5))*t0
 
 h(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})=exp(sum((-t.*(quantile(Normal(),u)+l)+t.^2/2.).*(1.-t0)+(-log(abs(t+1e-5))+(1.-t)./(l+1e-5).*log(u)).*t0))
+h2(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=exp(t*sum(t/2-l-quantile(Normal(),u))*(1.-t0)+(-length(u)*log(abs(t+1e-5))+(1.-t)/l*sum(log(u)))*t0)
 
 gh(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})=((t-quantile(Normal(),u)-l).*(1.-t0)+(-1./(t+1e-5)-log(u)./(l+1e-5)).*t0)*h(u,t,l,t0)
+gh2(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=(sum(t-l-quantile(Normal(),u))*(1.-t0)+sum(-1/(t+1e-5)-log(u)/(l+1e-5))*t0)*h(u,t,l,t0)
 
 r(u::Vector{Float64},t::Vector{Float64},f::Function,t0::Vector{Float64})=f(g(ginv(u,t,t0),t0,t0))*h(u,t,t,t0)
+r2(u::Vector{Float64},t::Float64,f::Function,t0::Float64)=f2(g2(ginv2(u,t,t0),t0,t0))*h2(u,t,t,t0)
 
 gn(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},f::Function,t0::Vector{Float64})=f(g(ginv(u,l,t0),t0,t0))^2*gh(u,t,l,t0)*h(u,l,l,t0)
+gn2(u::Vector{Float64},t::Float64,l::Float64,f::Function,t0::Float64)=f2(g2(ginv2(u,l,t0),t0,t0))^2*gh2(u,t,l,t0)*h2(u,l,l,t0)
 
 function maxd(t::Vector{Float64},lb::Vector{Float64},ub::Vector{Float64})
     d=length(t)
@@ -24,6 +30,7 @@ function maxd(t::Vector{Float64},lb::Vector{Float64},ub::Vector{Float64})
     [(t[i]-lb[i])<(ub[i]-t[i]) ? corner[i]=ub[i] : corner[i]=lb[i] for i=1:d]
     return(norm(t-corner))
 end
+maxd2(t::Float64,lb::Float64,ub::Float64)=max(t-lb,ub-t)
 
 function points(lb::Vector{Float64},ub::Vector{Float64},npart::Int64)
     d=length(lb)
@@ -45,10 +52,24 @@ function maxl(l::Vector{Float64},lb::Vector{Float64},ub::Vector{Float64},npart::
     end
     return(maximum(L))
 end
+function maxl2(l::Float64,lb::Float64,ub::Float64,npart::Int64,sampsize::Int64,f::Function,d::Int64,t0::Float64)
+    pts=linspace(lb,ub,npart)
+    L=zeros(npart)
+    samp=zeros(sampsize)
+    for i=1:npart
+        for j=1:sampsize
+            samp[j]=gn2(rand(d),pts[i],l,f,t0)^2
+        end
+        L[i]=sqrt(mean(samp))
+    end
+    return(maximum(L))
+end
 
 t(z::Vector{Float64},t0::Vector{Float64})=z.*(1.-t0)-z.*t0
+t2(z::Vector{Float64},t0::Float64)=sum(z)*(1.-t0)-sum(z)*t0
 
 gq(l::Vector{Float64},t0::Vector{Float64})=-l.*(1.-t0)+1./(l+1e-5).*t0
+gq2(l::Float64,d::Int64,t0::Float64)=-d*l*(1.-t0)+d/(l+1e-5)*t0
 
 function saa(u::Vector{Float64},lb::Vector{Float64},ub::Vector{Float64},npart::Int64,f::Function,t0::Vector{Float64})
     d=length(u)
@@ -56,6 +77,12 @@ function saa(u::Vector{Float64},lb::Vector{Float64},ub::Vector{Float64},npart::I
     samp=zeros(npart^d)
     [samp[i]=h(u,pts[:,i],t0,t0) for i=1:npart^d]
     return(pts[:,findmin(samp)[2]])
+end
+function saa2(u::Vector{Float64},lb::Float64,ub::Float64,npart::Int64,f::Function,t0::Float64)
+    pts=linspace(lb,ub,npart)
+    samp=zeros(npart)
+    [samp[i]=h(u,pts[i],t0,t0) for i=1:npart]
+    return(pts[findmin(samp)[2]])
 end
 
 """
@@ -114,7 +141,8 @@ Terminal values: μ=0.015014809526721174, θ=1x3 Array{Float64,2}:
  0.226725  0.234437  0.230236
 ```
 """
-function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,npart::Int64=5,sampsize::Int64=10^2,accel::AbstractString="none")
+function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,npart::Int64=5,sampsize::Int64=10^2,accel::AbstractString="none",dimreduc::Bool=false)
+    if dimreduc==false
     if d<1
         error("The dimension of the problem should be positive.")
     end
@@ -159,7 +187,7 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
             rsamp[i]=r(u,mean(θ[:,1:i],2)[1:end],f,t0)
             θ[:,i+1]=min(max(θ[:,i]-step*f(u)^2*gh(u,θ[:,i],t0,t0),lb),ub)
         end
-        μ=cumsum(rsamp,1)./(1:n)
+        μ=cumsum(rsamp)./(1:n)
         θbar=cumsum(θ[:,1:n],2)./repmat((1:n)',d,1)
         return(ais_type(μ,θbar',t0))
         
@@ -175,7 +203,7 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
             rsamp[tau]=temp
         end
         if tau==n
-            μ=cumsum(rsamp,1)./(1:n)
+            μ=cumsum(rsamp)./(1:n)
             return(ais_type(μ,(θ[:,1:n])',t0))
         end
         θ[:,tau+1]=min(max(t0-temp^2*gh(u,t0,t0,t0)/tau^0.7,lb),ub)
@@ -194,12 +222,98 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
             rsamp[i]=r(u,mean(θ[:,tau+1:i],2)[1:end],f,t0)
             θ[:,i+1]=min(max(θ[:,i]-step*gn(u,θ[:,i],λ,f,t0),lb),ub)
         end
-        μ=cumsum(rsamp,1)./(1:n)
+        μ=cumsum(rsamp)./(1:n)
         θbar=hcat(repmat(t0,1,tau),cumsum(θ[:,tau+1:n],2)./repmat((1:n-tau)',d,1))
         return(ais_type(μ,θbar',λ))
         
     else
         error("The acceleration method specified is not valid. Choose from none, directsub, sa, and saa.")
+    end
+    
+    else
+    if d<1
+        error("The dimension of the problem should be positive.")
+    end
+    if n<1
+        error("n should be positive.")
+    end
+    if typeof(t0)!=Float64
+        error("When using dimension reduction, t0 should be of type Float64.")
+    end
+    if t0^2!=t0
+        error("When using dimension reduction, t0 should be either 0 or 1.")
+    end
+    if typeof(lb)!=Float64
+        error("When using dimension reduction, lb should be of type Float64.")
+    end
+    if typeof(ub)!=Float64
+        error("When using dimension reduction, ub should be of type Float64.")
+    end
+    if (lb<=t0<=ub)==false
+        error("lb should be smaller than or equal to ub and they should contain t0.")
+    end
+    if t0==1. && lb<=0.
+        error("When using dimension reduction, if t0 is 1,then lb should be positive.")
+    end
+    if npart<2
+        error("npart should be at least 2.")
+    end
+    if sampsize<1
+        error("sampsize should be positive.")
+    end
+    
+    rsamp=zeros(n)
+    θ=t0*ones(n+1)
+    
+    if accel=="none"
+        step=maxd2(t0,lb,ub)/(maxl2(t0,lb,ub,npart,sampsize,f,d,t0)*sqrt(n))*sqrt(sum(1./(1:n)))
+        for i=1:n
+            u=rand(d)
+            rsamp[i]=r2(u,mean(θ[1:i]),f,t0)
+            θ[i+1]=min(max(θ[i]-step*f(u)^2*gh2(u,θ[i],t0,t0),lb),ub)
+        end
+        μ=cumsum(rsamp)./(1:n)
+        θbar=cumsum(θ[1:n])./(1:n)
+        return(ais_type(μ,θbar,t0))
+        
+    elseif accel=="directsub" || accel=="sa" || accel=="saa"
+        tau=0
+        u=0.
+        temp=0.
+        λ=copy(t0)
+        while temp==0. && tau!=n
+            tau=tau+1
+            u=rand(d)
+            temp=f(u)
+            rsamp[tau]=temp
+        end
+        if tau==n
+            μ=cumsum(rsamp)./(1:n)
+            return(ais_type(μ,θ[1:n],t0))
+        end
+        θ[tau+1]=min(max(t0-temp^2*gh2(u,t0,t0,t0)/tau^0.7,lb),ub)
+        newt0=mean(θ[1:tau+1])
+        θ[tau+1]=copy(newt0)
+        if accel=="directsub"
+            λ=copy(newt0)
+        elseif accel=="sa"
+            λ=min(max(t0+(t2(ginv2(u,t0,t0),t0)+gq2(t0,d,t0))/tau^0.7,lb),ub)
+        else
+            λ=saa2(u,lb,ub,npart,f,t0)
+        end
+        step=maxd2(newt0,lb,ub)/(maxl2(λ,lb,ub,npart,sampsize,f,d,t0)*sqrt(n-tau))*sqrt(sum(1./(1:n-tau)))
+        for i=tau+1:n
+            u=rand(d)
+            rsamp[i]=r2(u,mean(θ[tau+1:i]),f,t0)
+            θ[i+1]=min(max(θ[i]-step*gn2(u,θ[i],λ,f,t0),lb),ub)
+        end
+        μ=cumsum(rsamp)./(1:n)
+        θbar=vcat(t0*ones(tau),cumsum(θ[tau+1:n])./(1:n-tau))
+        return(ais_type(μ,θbar,λ))
+        
+    else
+        error("The acceleration method specified is not valid. Choose from none, directsub, sa, and saa.")
+    end
     end
 end
 
