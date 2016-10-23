@@ -244,12 +244,8 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
     if t0^2!=t0
         error("When using dimension reduction, t0 should be either 0 or 1.")
     end
-    if typeof(lb)!=Float64
-        error("When using dimension reduction, lb should be of type Float64.")
-    end
-    if typeof(ub)!=Float64
-        error("When using dimension reduction, ub should be of type Float64.")
-    end
+    lb=convert(Float64,lb[1])
+    ub=convert(Float64,ub[1])
     if (lb<=t0<=ub)==false
         error("lb should be smaller than or equal to ub and they should contain t0.")
     end
