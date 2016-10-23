@@ -240,9 +240,7 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
     if n<1
         error("n should be positive.")
     end
-    if typeof(t0)!=Float64
-        error("When using dimension reduction, t0 should be of type Float64.")
-    end
+    t0=convert(Float64,t0[1])
     if t0^2!=t0
         error("When using dimension reduction, t0 should be either 0 or 1.")
     end
