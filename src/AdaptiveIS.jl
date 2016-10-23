@@ -19,10 +19,10 @@ gh(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})
 gh2(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=(sum(t-l-quantile(Normal(),u))*(1.-t0)+sum(-1/(t+1e-5)-log(u)/(l+1e-5))*t0)*h(u,t,l,t0)
 
 r(u::Vector{Float64},t::Vector{Float64},f::Function,t0::Vector{Float64})=f(g(ginv(u,t,t0),t0,t0))*h(u,t,t,t0)
-r2(u::Vector{Float64},t::Float64,f::Function,t0::Float64)=f2(g2(ginv2(u,t,t0),t0,t0))*h2(u,t,t,t0)
+r2(u::Vector{Float64},t::Float64,f::Function,t0::Float64)=f(g2(ginv2(u,t,t0),t0,t0))*h2(u,t,t,t0)
 
 gn(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},f::Function,t0::Vector{Float64})=f(g(ginv(u,l,t0),t0,t0))^2*gh(u,t,l,t0)*h(u,l,l,t0)
-gn2(u::Vector{Float64},t::Float64,l::Float64,f::Function,t0::Float64)=f2(g2(ginv2(u,l,t0),t0,t0))^2*gh2(u,t,l,t0)*h2(u,l,l,t0)
+gn2(u::Vector{Float64},t::Float64,l::Float64,f::Function,t0::Float64)=f(g2(ginv2(u,l,t0),t0,t0))^2*gh2(u,t,l,t0)*h2(u,l,l,t0)
 
 function maxd(t::Vector{Float64},lb::Vector{Float64},ub::Vector{Float64})
     d=length(t)
