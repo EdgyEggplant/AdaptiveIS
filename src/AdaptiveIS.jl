@@ -16,7 +16,7 @@ h(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})=
 h2(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=exp(t*sum(t/2-l-quantile(Normal(),u))*(1.-t0)+(-length(u)*log(abs(t+1e-5))+(1.-t)/l*sum(log(u)))*t0)
 
 gh(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})=((t-quantile(Normal(),u)-l).*(1.-t0)+(-1./(t+1e-5)-log(u)./(l+1e-5)).*t0)*h(u,t,l,t0)
-gh2(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=(sum(t-l-quantile(Normal(),u))*(1.-t0)+sum(-1/(t+1e-5)-log(u)/(l+1e-5))*t0)*h(u,t,l,t0)
+gh2(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=(sum(t-l-quantile(Normal(),u))*(1.-t0)+sum(-1/(t+1e-5)-log(u)/(l+1e-5))*t0)*h2(u,t,l,t0)
 
 r(u::Vector{Float64},t::Vector{Float64},f::Function,t0::Vector{Float64})=f(g(ginv(u,t,t0),t0,t0))*h(u,t,t,t0)
 r2(u::Vector{Float64},t::Float64,f::Function,t0::Float64)=f(g2(ginv2(u,t,t0),t0,t0))*h2(u,t,t,t0)
