@@ -130,6 +130,9 @@ in robust stochastic approximation.
 accelerate the Monte Carlo simulation, and if so, the method of choosing the auxiliary
 parameter. Useful when the function `f` is zero with a high probability. Accepted
 arguments are "`none`", "`directsub`", "`sa`", and "`saa`".
+* `dimreduc::Bool=false`: if true, implements dimension reduction of the importance
+sampling parameter by restricting all components of the importance sampling parameter
+to be equal.
 
 # Example
 ```jldoctest
