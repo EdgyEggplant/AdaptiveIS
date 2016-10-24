@@ -7,22 +7,22 @@ using Distributions, Plots
 export ais_type, show, ais, plot, plot!
 
 g(z::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})=cdf(Normal(),z-t).*(1.-t0)+exp(-t.*z).*t0
-g2(z::Vector{Float64},t::Float64,t0::Float64)=cdf(Normal(),z-t)*(1.-t0)+exp(-t*z)*t0
+g_dimreduc(z::Vector{Float64},t::Float64,t0::Float64)=cdf(Normal(),z-t)*(1.-t0)+exp(-t*z)*t0
 
 ginv(u::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})=(quantile(Normal(),u)+t).*(1.-t0)+(-log(u)./(t+1e-5)).*t0
-ginv2(u::Vector{Float64},t::Float64,t0::Float64)=(quantile(Normal(),u)+t)*(1.-t0)+(-log(u)/(t+1e-5))*t0
+ginv_dimreduc(u::Vector{Float64},t::Float64,t0::Float64)=(quantile(Normal(),u)+t)*(1.-t0)+(-log(u)/(t+1e-5))*t0
 
 h(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})=exp(sum((-t.*(quantile(Normal(),u)+l)+t.^2/2.).*(1.-t0)+(-log(abs(t+1e-5))+(1.-t)./(l+1e-5).*log(u)).*t0))
-h2(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=exp(t*sum(t/2-l-quantile(Normal(),u))*(1.-t0)+(-length(u)*log(abs(t+1e-5))+(1.-t)/(l+1e-5)*sum(log(u)))*t0)
+h_dimreduc(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=exp(t*sum(t/2-l-quantile(Normal(),u))*(1.-t0)+(-length(u)*log(abs(t+1e-5))+(1.-t)/(l+1e-5)*sum(log(u)))*t0)
 
-gh(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})=((t-quantile(Normal(),u)-l).*(1.-t0)+(-1./(t+1e-5)-log(u)./(l+1e-5)).*t0)*h(u,t,l,t0)
-gh2(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=(sum(t-l-quantile(Normal(),u))*(1.-t0)+sum(-1/(t+1e-5)-log(u)/(l+1e-5))*t0)*h2(u,t,l,t0)
+gradh(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})=((t-quantile(Normal(),u)-l).*(1.-t0)+(-1./(t+1e-5)-log(u)./(l+1e-5)).*t0)*h(u,t,l,t0)
+gradh_dimreduc(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=(sum(t-l-quantile(Normal(),u))*(1.-t0)+sum(-1/(t+1e-5)-log(u)/(l+1e-5))*t0)*h_dimreduc(u,t,l,t0)
 
 r(u::Vector{Float64},t::Vector{Float64},f::Function,t0::Vector{Float64})=f(g(ginv(u,t,t0),t0,t0))*h(u,t,t,t0)
-r2(u::Vector{Float64},t::Float64,f::Function,t0::Float64)=f(g2(ginv2(u,t,t0),t0,t0))*h2(u,t,t,t0)
+r_dimreduc(u::Vector{Float64},t::Float64,f::Function,t0::Float64)=f(g_dimreduc(ginv_dimreduc(u,t,t0),t0,t0))*h_dimreduc(u,t,t,t0)
 
-gn(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},f::Function,t0::Vector{Float64})=f(g(ginv(u,l,t0),t0,t0))^2*gh(u,t,l,t0)*h(u,l,l,t0)
-gn2(u::Vector{Float64},t::Float64,l::Float64,f::Function,t0::Float64)=f(g2(ginv2(u,l,t0),t0,t0))^2*gh2(u,t,l,t0)*h2(u,l,l,t0)
+gradn(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},f::Function,t0::Vector{Float64})=f(g(ginv(u,l,t0),t0,t0))^2*gradh(u,t,l,t0)*h(u,l,l,t0)
+gradn_dimreduc(u::Vector{Float64},t::Float64,l::Float64,f::Function,t0::Float64)=f(g_dimreduc(ginv_dimreduc(u,l,t0),t0,t0))^2*gradh_dimreduc(u,t,l,t0)*h_dimreduc(u,l,l,t0)
 
 function maxd(t::Vector{Float64},lb::Vector{Float64},ub::Vector{Float64})
     d=length(t)
@@ -30,7 +30,7 @@ function maxd(t::Vector{Float64},lb::Vector{Float64},ub::Vector{Float64})
     [(t[i]-lb[i])<(ub[i]-t[i]) ? corner[i]=ub[i] : corner[i]=lb[i] for i=1:d]
     return(norm(t-corner))
 end
-maxd2(t::Float64,lb::Float64,ub::Float64)=max(t-lb,ub-t)
+maxd_dimreduc(t::Float64,lb::Float64,ub::Float64)=max(t-lb,ub-t)
 
 function points(lb::Vector{Float64},ub::Vector{Float64},npart::Int64)
     d=length(lb)
@@ -46,19 +46,19 @@ function maxl(l::Vector{Float64},lb::Vector{Float64},ub::Vector{Float64},npart::
     samp=zeros(sampsize)
     for i=1:npart^d
         for j=1:sampsize
-            samp[j]=norm(gn(rand(d),pts[:,i],l,f,t0))^2
+            samp[j]=norm(gradn(rand(d),pts[:,i],l,f,t0))^2
         end
         L[i]=sqrt(mean(samp))
     end
     return(maximum(L))
 end
-function maxl2(l::Float64,lb::Float64,ub::Float64,npart::Int64,sampsize::Int64,f::Function,d::Int64,t0::Float64)
+function maxl_dimreduc(l::Float64,lb::Float64,ub::Float64,npart::Int64,sampsize::Int64,f::Function,d::Int64,t0::Float64)
     pts=linspace(lb,ub,npart)
     L=zeros(npart)
     samp=zeros(sampsize)
     for i=1:npart
         for j=1:sampsize
-            samp[j]=gn2(rand(d),pts[i],l,f,t0)^2
+            samp[j]=gradn_dimreduc(rand(d),pts[i],l,f,t0)^2
         end
         L[i]=sqrt(mean(samp))
     end
@@ -66,10 +66,10 @@ function maxl2(l::Float64,lb::Float64,ub::Float64,npart::Int64,sampsize::Int64,f
 end
 
 t(z::Vector{Float64},t0::Vector{Float64})=z.*(1.-t0)-z.*t0
-t2(z::Vector{Float64},t0::Float64)=sum(z)*(1.-t0)-sum(z)*t0
+t_dimreduc(z::Vector{Float64},t0::Float64)=sum(z)*(1.-t0)-sum(z)*t0
 
-gq(l::Vector{Float64},t0::Vector{Float64})=-l.*(1.-t0)+1./(l+1e-5).*t0
-gq2(l::Float64,d::Int64,t0::Float64)=-d*l*(1.-t0)+d/(l+1e-5)*t0
+gradq(l::Vector{Float64},t0::Vector{Float64})=-l.*(1.-t0)+1./(l+1e-5).*t0
+gradq_dimreduc(l::Float64,d::Int64,t0::Float64)=-d*l*(1.-t0)+d/(l+1e-5)*t0
 
 function saa(u::Vector{Float64},lb::Vector{Float64},ub::Vector{Float64},npart::Int64,f::Function,t0::Vector{Float64})
     d=length(u)
@@ -78,10 +78,10 @@ function saa(u::Vector{Float64},lb::Vector{Float64},ub::Vector{Float64},npart::I
     [samp[i]=h(u,pts[:,i],t0,t0) for i=1:npart^d]
     return(pts[:,findmin(samp)[2]])
 end
-function saa2(u::Vector{Float64},lb::Float64,ub::Float64,npart::Int64,f::Function,t0::Float64)
+function saa_dimreduc(u::Vector{Float64},lb::Float64,ub::Float64,npart::Int64,f::Function,t0::Float64)
     pts=linspace(lb,ub,npart)
     samp=zeros(npart)
-    [samp[i]=h2(u,pts[i],t0,t0) for i=1:npart]
+    [samp[i]=h_dimreduc(u,pts[i],t0,t0) for i=1:npart]
     return(pts[findmin(samp)[2]])
 end
 
@@ -89,7 +89,7 @@ end
 Stores the intermediate values of the empirical mean and importance sampling parameter
 as well as the value of the auxiliary parameter.
 """
-type ais_type
+type Ais
     "The intermediate values of the empirical mean."
     μ::Vector{Float64}
     "The intermediate values of the importance sampling parameter."
@@ -98,8 +98,8 @@ type ais_type
     λ::Vector{Float64}
 end
 
-function Base.show(io::IO, ais::ais_type)
-    print(io, "Terminal values: μ=$(ais.μ[end]), θ=$(ais.θ[end,:])")
+function Base.show(io::IO,ais::Ais)
+    print(io,"Terminal values: μ=$(ais.μ[end]), θ=$(ais.θ[end,:])")
 end
 
 """
@@ -189,46 +189,46 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
         for i=1:n
             u=rand(d)
             rsamp[i]=r(u,mean(θ[:,1:i],2)[1:end],f,t0)
-            θ[:,i+1]=min(max(θ[:,i]-step*f(u)^2*gh(u,θ[:,i],t0,t0),lb),ub)
+            θ[:,i+1]=min(max(θ[:,i]-step*f(u)^2*gradh(u,θ[:,i],t0,t0),lb),ub)
         end
         μ=cumsum(rsamp)./(1:n)
         θbar=cumsum(θ[:,1:n],2)./repmat((1:n)',d,1)
-        return(ais_type(μ,θbar',t0))
+        return(Ais(μ,θbar',t0))
         
     elseif accel=="directsub" || accel=="sa" || accel=="saa"
-        tau=0
+        τ=0
         u=0.
         temp=0.
         λ=copy(t0)
-        while temp==0. && tau!=n
-            tau=tau+1
+        while temp==0. && τ!=n
+            τ=τ+1
             u=rand(d)
             temp=f(u)
-            rsamp[tau]=temp
+            rsamp[τ]=temp
         end
-        if tau==n
+        if τ==n
             μ=cumsum(rsamp)./(1:n)
-            return(ais_type(μ,(θ[:,1:n])',t0))
+            return(Ais(μ,(θ[:,1:n])',t0))
         end
-        θ[:,tau+1]=min(max(t0-temp^2*gh(u,t0,t0,t0)/tau^0.7,lb),ub)
-        newt0=mean(θ[:,1:tau+1],2)[1:end]
-        θ[:,tau+1]=copy(newt0)
+        θ[:,τ+1]=min(max(t0-temp^2*gradh(u,t0,t0,t0)/tau^0.7,lb),ub)
+        newt0=mean(θ[:,1:τ+1],2)[1:end]
+        θ[:,τ+1]=copy(newt0)
         if accel=="directsub"
             λ=copy(newt0)
         elseif accel=="sa"
-            λ=min(max(t0+(t(ginv(u,t0,t0),t0)+gq(t0,t0))/tau^0.7,lb),ub)
+            λ=min(max(t0+(t(ginv(u,t0,t0),t0)+gradq(t0,t0))/τ^0.7,lb),ub)
         else
             λ=saa(u,lb,ub,npart,f,t0)
         end
-        step=maxd(newt0,lb,ub)/(maxl(λ,lb,ub,npart,sampsize,f,t0)*sqrt(n-tau))*sqrt(sum(1./(1:n-tau)))
-        for i=tau+1:n
+        step=maxd(newt0,lb,ub)/(maxl(λ,lb,ub,npart,sampsize,f,t0)*sqrt(n-τ))*sqrt(sum(1./(1:n-τ)))
+        for i=τ+1:n
             u=rand(d)
-            rsamp[i]=r(u,mean(θ[:,tau+1:i],2)[1:end],f,t0)
-            θ[:,i+1]=min(max(θ[:,i]-step*gn(u,θ[:,i],λ,f,t0),lb),ub)
+            rsamp[i]=r(u,mean(θ[:,τ+1:i],2)[1:end],f,t0)
+            θ[:,i+1]=min(max(θ[:,i]-step*gradn(u,θ[:,i],λ,f,t0),lb),ub)
         end
         μ=cumsum(rsamp)./(1:n)
-        θbar=hcat(repmat(t0,1,tau),cumsum(θ[:,tau+1:n],2)./repmat((1:n-tau)',d,1))
-        return(ais_type(μ,θbar',λ))
+        θbar=hcat(repmat(t0,1,τ),cumsum(θ[:,τ+1:n],2)./repmat((1:n-τ)',d,1))
+        return(Ais(μ,θbar',λ))
         
     else
         error("The acceleration method specified is not valid. Choose from none, directsub, sa, and saa.")
@@ -264,50 +264,50 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
     θ=t0*ones(n+1)
     
     if accel=="none"
-        step=maxd2(t0,lb,ub)/(maxl2(t0,lb,ub,npart,sampsize,f,d,t0)*sqrt(n))*sqrt(sum(1./(1:n)))
+        step=maxd_dimreduc(t0,lb,ub)/(maxl_dimreduc(t0,lb,ub,npart,sampsize,f,d,t0)*sqrt(n))*sqrt(sum(1./(1:n)))
         for i=1:n
             u=rand(d)
-            rsamp[i]=r2(u,mean(θ[1:i]),f,t0)
-            θ[i+1]=min(max(θ[i]-step*f(u)^2*gh2(u,θ[i],t0,t0),lb),ub)
+            rsamp[i]=r_dimreduc(u,mean(θ[1:i]),f,t0)
+            θ[i+1]=min(max(θ[i]-step*f(u)^2*gradh_dimreduc(u,θ[i],t0,t0),lb),ub)
         end
         μ=cumsum(rsamp)./(1:n)
         θbar=repmat(cumsum(θ[1:n])./(1:n),1,1)
-        return(ais_type(μ,θbar,ones(1)*t0))
+        return(Ais(μ,θbar,ones(1)*t0))
         
     elseif accel=="directsub" || accel=="sa" || accel=="saa"
-        tau=0
+        τ=0
         u=0.
         temp=0.
         λ=copy(t0)
-        while temp==0. && tau!=n
-            tau=tau+1
+        while temp==0. && τ!=n
+            τ=τ+1
             u=rand(d)
             temp=f(u)
-            rsamp[tau]=temp
+            rsamp[τ]=temp
         end
-        if tau==n
+        if τ==n
             μ=cumsum(rsamp)./(1:n)
-            return(ais_type(μ,repmat(θ[1:n],1,1),ones(1)*t0))
+            return(Ais(μ,repmat(θ[1:n],1,1),ones(1)*t0))
         end
-        θ[tau+1]=min(max(t0-temp^2*gh2(u,t0,t0,t0)/tau^0.7,lb),ub)
-        newt0=mean(θ[1:tau+1])
-        θ[tau+1]=copy(newt0)
+        θ[τ+1]=min(max(t0-temp^2*gradh_dimreduc(u,t0,t0,t0)/τ^0.7,lb),ub)
+        newt0=mean(θ[1:τ+1])
+        θ[τ+1]=copy(newt0)
         if accel=="directsub"
             λ=copy(newt0)
         elseif accel=="sa"
-            λ=min(max(t0+(t2(ginv2(u,t0,t0),t0)+gq2(t0,d,t0))/tau^0.7,lb),ub)
+            λ=min(max(t0+(t_dimreduc(ginv_dimreduc(u,t0,t0),t0)+gradq_dimreduc(t0,d,t0))/τ^0.7,lb),ub)
         else
-            λ=saa2(u,lb,ub,npart,f,t0)
+            λ=saa_dimreduc(u,lb,ub,npart,f,t0)
         end
-        step=maxd2(newt0,lb,ub)/(maxl2(λ,lb,ub,npart,sampsize,f,d,t0)*sqrt(n-tau))*sqrt(sum(1./(1:n-tau)))
-        for i=tau+1:n
+        step=maxd_dimreduc(newt0,lb,ub)/(maxl_dimreduc(λ,lb,ub,npart,sampsize,f,d,t0)*sqrt(n-τ))*sqrt(sum(1./(1:n-τ)))
+        for i=τ+1:n
             u=rand(d)
-            rsamp[i]=r2(u,mean(θ[tau+1:i]),f,t0)
-            θ[i+1]=min(max(θ[i]-step*gn2(u,θ[i],λ,f,t0),lb),ub)
+            rsamp[i]=r_dimreduc(u,mean(θ[τ+1:i]),f,t0)
+            θ[i+1]=min(max(θ[i]-step*gradn_dimreduc(u,θ[i],λ,f,t0),lb),ub)
         end
         μ=cumsum(rsamp)./(1:n)
-        θbar=repmat(vcat(t0*ones(tau),cumsum(θ[tau+1:n])./(1:n-tau)),1,1)
-        return(ais_type(μ,θbar,ones(1)*λ))
+        θbar=repmat(vcat(t0*ones(τ),cumsum(θ[τ+1:n])./(1:n-τ)),1,1)
+        return(Ais(μ,θbar,ones(1)*λ))
         
     else
         error("The acceleration method specified is not valid. Choose from none, directsub, sa, and saa.")
@@ -315,10 +315,8 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
     end
 end
 
-function Plots.plot!(ais::ais_type)
-    plot!(ais.μ)
+@recipe function f(ais::Ais)
+    ais.μ
 end
-
-Plots.plot(ais::ais_type) = (plot();plot!(ais))
 
 end
