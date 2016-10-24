@@ -32,4 +32,4 @@ plot!(cumsum(sim2)./(1:10000))
 plot!(0.0151874*ones(10000))
 ```
 
-<img src=https://github.com/EdgyEggplant/AdaptiveIS.jl/raw/master/images/means.png width=500 height=400>
+<img src=https://github.com/EdgyEggplant/AdaptiveIS.jl/raw/master/images/means.png width=600 height=400>
