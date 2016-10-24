@@ -13,7 +13,7 @@ As an example, consider estimating the probability that the mean of three iid un
 using AdaptiveIS
 srand(5)
 f(x) = mean(x)>=0.85 ? 1. : 0.
-sim1 = ais(f,3)
+sim1 = ais(f,3,n=10000)
 ```
 
 Compare this to a crude Monte Carlo simulation:
