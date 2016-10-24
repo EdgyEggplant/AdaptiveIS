@@ -131,7 +131,9 @@ accelerate the Monte Carlo simulation, and if so, the method of choosing the aux
 parameter. Useful when the function `f` is zero with a high probability. Accepted
 arguments are "`none`", "`directsub`", "`sa`", and "`saa`".
 * `dimreduc::Bool=false`: if true, implements dimension reduction by restricting all
-components of the importance sampling parameter to be equal.
+components of the importance sampling parameter to be equal. Useful when `d` is large
+(e.g. at least 5) and `f` is symmetric with respect to its inputs (so that the
+restriction is reasonable).
 
 # Example
 ```jldoctest
