@@ -210,7 +210,7 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
             μ=cumsum(rsamp)./(1:n)
             return(Ais(μ,(θ[:,1:n])',t0))
         end
-        θ[:,τ+1]=min(max(t0-temp^2*gradh(u,t0,t0,t0)/tau^0.7,lb),ub)
+        θ[:,τ+1]=min(max(t0-temp^2*gradh(u,t0,t0,t0)/τ^0.7,lb),ub)
         newt0=mean(θ[:,1:τ+1],2)[1:end]
         θ[:,τ+1]=copy(newt0)
         if accel=="directsub"
