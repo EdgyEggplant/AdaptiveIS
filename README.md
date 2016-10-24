@@ -27,9 +27,9 @@ sim2 = zeros(10000)
 A plot of the sample paths of the empirical means and the true mean:
 
 ```julia
-plot(sim1,ylims=c(0.01,0.02))
+plot(sim1)
 plot!(cumsum(sim2)./(1:10000))
-plot!(0.0151874*ones(10000))
+plot!(0.0151874*ones(10000),ylims=c(0.01,0.02))
 ```
 
 <img src=https://github.com/EdgyEggplant/AdaptiveIS.jl/raw/master/images/means.png width=600 height=400>
