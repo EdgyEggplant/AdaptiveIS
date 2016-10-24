@@ -130,9 +130,8 @@ in robust stochastic approximation.
 accelerate the Monte Carlo simulation, and if so, the method of choosing the auxiliary
 parameter. Useful when the function `f` is zero with a high probability. Accepted
 arguments are "`none`", "`directsub`", "`sa`", and "`saa`".
-* `dimreduc::Bool=false`: if true, implements dimension reduction of the importance
-sampling parameter by restricting all components of the importance sampling parameter
-to be equal.
+* `dimreduc::Bool=false`: if true, implements dimension reduction by restricting all
+components of the importance sampling parameter to be equal.
 
 # Example
 ```jldoctest
@@ -233,7 +232,7 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
         error("The acceleration method specified is not valid. Choose from none, directsub, sa, and saa.")
     end
     
-    else
+    elseif dimreduc==true
     if d<1
         error("The dimension of the problem should be positive.")
     end
