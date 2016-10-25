@@ -7,7 +7,7 @@ Approximate the expected value of a function of iid standard uniform random vari
 
 Adaptive importance sampling is a variance reduction technique in Monte Carlo simulations. Although it is more computationally intensive than a crude Monte Carlo simulation, the convergence to the expected value is faster over the same number of iterations.
 
-As an example, consider estimating the probability that the mean of three iid uniform random variables is at least 0.85:
+As an example, consider estimating the probability that the mean of three iid uniform random variables is at least 0.85. Writing the probability as the expected value of an indicator function, we get:
 
 ```julia
 using AdaptiveIS
