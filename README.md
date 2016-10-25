@@ -13,23 +13,23 @@ As an example, consider estimating the probability that the mean of three iid un
 using AdaptiveIS
 srand(5)
 f(x) = mean(x)>=0.85 ? 1. : 0.
-sim1 = ais(f,3,n=10000)
+sim1 = ais(f,3,n=10^4)
 ```
 
 Compare this to a crude Monte Carlo simulation:
 
 ```julia
 srand(5)
-sim2 = zeros(10000)
-[sim2[i] = f(rand(3)) for i=1:10000]
+sim2 = zeros(10^4)
+[sim2[i] = f(rand(3)) for i=1:10^4]
 ```
 
 A plot of the sample paths of the empirical means and the true mean:
 
 ```julia
 plot(sim1)
-plot!(cumsum(sim2)./(1:10000))
-plot!(0.0151874*ones(10000),ylims=c(0.01,0.02))
+plot!(cumsum(sim2)./(1:10^4))
+plot!(0.0151874*ones(10^4),ylims=c(0.01,0.02))
 ```
 
 <img src=https://github.com/EdgyEggplant/AdaptiveIS.jl/raw/master/images/means.png width=600 height=400>
