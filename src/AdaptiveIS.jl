@@ -4,7 +4,7 @@ module AdaptiveIS
 
 using Distributions, Plots
 
-export Ais, show, ais
+export Ais, show, ais, plot!, plot
 
 g(z::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})=cdf(Normal(),z-t).*(1.-t0)+exp(-t.*z).*t0
 g_dimreduc(z::Vector{Float64},t::Float64,t0::Float64)=cdf(Normal(),z-t)*(1.-t0)+exp(-t*z)*t0
