@@ -105,9 +105,9 @@ end
 """
     ais(f::Function,d::Int64;<keyword arguments>)
 
-Approximate the expected value of `f` whose domain is the `d`-dimensional hypercube
-using adaptive importance sampling, where the importance sampling parameter is updated
-using robust stochastic approximation.
+Approximate the expected value of `f`, a function of `d` iid standard uniform random 
+variables, using adaptive importance sampling, where the importance sampling parameter
+is updated using robust stochastic approximation.
 
 # Arguments
 * `n::Int64=10^4`: the number of iterations of the Monte Carlo simulation.
