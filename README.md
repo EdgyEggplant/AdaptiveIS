@@ -16,19 +16,32 @@ f(x) = mean(x)>=0.85 ? 1. : 0.
 sim1 = ais(f,3,n=10^4)
 ```
 
-Compare this to a crude Monte Carlo simulation:
+Valid acceleration methods are "directsub", "sa", and "saa" (recommended):
 
 ```julia
-srand(5)
-sim2 = zeros(10^4)
-[sim2[i] = f(rand(3)) for i=1:10^4]
+sim2 = ais(f,3,n=10^4,accel="saa")
+```
+
+Dimension reduction is as easy as:
+
+```julia
+sim3 = ais(f,3,n=10^4,dimreduc=true)
+```
+
+Note that the function is symmetric with respect to its inputs, so this is valid. Compare the above to a crude Monte Carlo simulation:
+
+```julia
+sim4 = zeros(10^4)
+[sim4[i] = f(rand(3)) for i=1:10^4]
 ```
 
 A plot of the sample paths of the empirical means and the true mean:
 
 ```julia
 plot(sim1)
-plot!(cumsum(sim2)./(1:10^4))
+plot!(sim2)
+plot!(sim3)
+plot!(cumsum(sim4)./(1:10^4))
 plot!(0.0151874*ones(10^4),ylims=c(0.01,0.02))
 ```
 
