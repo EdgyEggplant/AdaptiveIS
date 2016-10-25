@@ -188,7 +188,7 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
         step=maxd(t0,lb,ub)/(maxl(t0,lb,ub,npart,sampsize,f,t0)*sqrt(n))*sqrt(sum(1./(1:n)))
         for i=1:n
             u=rand(d)
-            rsamp[i]=r(u,mean(θ[:,1:i],2)[1:end],f,t0)
+            rsamp[i]=r(u,vec(mean(θ[:,1:i],2)),f,t0)
             θ[:,i+1]=min(max(θ[:,i]-step*f(u)^2*gradh(u,θ[:,i],t0,t0),lb),ub)
         end
         μ=cumsum(rsamp)./(1:n)
@@ -211,7 +211,7 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
             return(Ais(μ,(θ[:,1:n])',t0))
         end
         θ[:,τ+1]=min(max(t0-temp^2*gradh(u,t0,t0,t0)/τ^0.7,lb),ub)
-        newt0=mean(θ[:,1:τ+1],2)[1:end]
+        newt0=vec(mean(θ[:,1:τ+1],2))
         θ[:,τ+1]=copy(newt0)
         if accel=="directsub"
             λ=copy(newt0)
@@ -223,7 +223,7 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
         step=maxd(newt0,lb,ub)/(maxl(λ,lb,ub,npart,sampsize,f,t0)*sqrt(n-τ))*sqrt(sum(1./(1:n-τ)))
         for i=τ+1:n
             u=rand(d)
-            rsamp[i]=r(u,mean(θ[:,τ+1:i],2)[1:end],f,t0)
+            rsamp[i]=r(u,vec(mean(θ[:,τ+1:i],2)),f,t0)
             θ[:,i+1]=min(max(θ[:,i]-step*gradn(u,θ[:,i],λ,f,t0),lb),ub)
         end
         μ=cumsum(rsamp)./(1:n)
