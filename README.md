@@ -3,7 +3,7 @@
 Approximate the expected value of a function of iid standard uniform random variables via adaptive importance sampling, where the importance sampling parameter is updated using robust stochastic approximation. Features include:
 * Plotting of the sample paths of the empirical mean and importance sampling parameter
 * Acceleration methods if the function is zero-valued with a high probabiilty
-* Dimension reduction if the dimension of the domain of the function is large and the function is symmetric with respect to its inputs
+* Dimension reduction if the function is symmetric with respect to its inputs
 
 Adaptive importance sampling is a variance reduction technique in Monte Carlo simulations. Although it is more computationally intensive than a crude Monte Carlo simulation, the convergence to the expected value is faster over the same number of iterations.
 
@@ -27,7 +27,7 @@ Dimension reduction is as easy as:
 
 ```julia
 srand(2)
-sim3 = ais(f,3,n=10^4,dimreduc=true)
+sim3 = ais(f,3,n=10^4,accel="saa",dimreduc=true)
 ```
 
 Note that the function is symmetric with respect to its inputs, so this is valid. Compare the above to a crude Monte Carlo simulation:
