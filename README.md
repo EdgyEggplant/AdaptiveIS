@@ -16,7 +16,7 @@ srand(2)
 sim1 = ais(f,3,n=10^4)
 ```
 
-Valid acceleration methods are "directsub", "sa", and "saa" (recommended):
+For this example, the function is zero-valued with a high probability (around 98.5%), so it makes sense to apply an acceleration method. Valid acceleration methods are "directsub", "sa", and "saa" (recommended):
 
 ```julia
 srand(2)
