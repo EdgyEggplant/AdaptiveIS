@@ -41,11 +41,11 @@ sim4 = zeros(10^4)
 A plot of the sample paths of the empirical means and the true mean:
 
 ```julia
-plot(sim1)
-plot!(sim2)
-plot!(sim3)
-plot!(cumsum(sim4)./(1:10^4))
-plot!(0.0151874*ones(10^4),ylims=(0.01,0.02))
+plot(sim1,label="ais")
+plot!(sim2,label="ais accel")
+plot!(sim3,label="ais dimreduc")
+plot!(cumsum(sim4)./(1:10^4),label="crude")
+plot!(0.0151874*ones(10^4),ylims=(0.01,0.02),label="true")
 ```
 
 <img src=https://github.com/EdgyEggplant/AdaptiveIS.jl/raw/master/images/means.png width=600 height=400>
