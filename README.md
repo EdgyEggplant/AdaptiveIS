@@ -48,4 +48,4 @@ plot!(cumsum(sim4)./(1:10^4),label="crude")
 plot!(0.0151874*ones(10^4),ylims=(0.01,0.02),label="true")
 ```
 
-<img src=https://github.com/EdgyEggplant/AdaptiveIS.jl/raw/master/images/Capture.PNG>
+<img src=https://github.com/EdgyEggplant/AdaptiveIS.jl/raw/master/images/Capture.PNG width=600 height=400>
