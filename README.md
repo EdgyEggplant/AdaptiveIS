@@ -11,26 +11,29 @@ As an example, consider estimating the probability that the mean of three iid un
 
 ```julia
 using AdaptiveIS
-srand(5)
 f(x) = mean(x)>=0.85 ? 1. : 0.
+srand(2)
 sim1 = ais(f,3,n=10^4)
 ```
 
 Valid acceleration methods are "directsub", "sa", and "saa" (recommended):
 
 ```julia
+srand(2)
 sim2 = ais(f,3,n=10^4,accel="saa")
 ```
 
 Dimension reduction is as easy as:
 
 ```julia
+srand(2)
 sim3 = ais(f,3,n=10^4,dimreduc=true)
 ```
 
 Note that the function is symmetric with respect to its inputs, so this is valid. Compare the above to a crude Monte Carlo simulation:
 
 ```julia
+srand(2)
 sim4 = zeros(10^4)
 [sim4[i] = f(rand(3)) for i=1:10^4]
 ```
@@ -42,7 +45,7 @@ plot(sim1)
 plot!(sim2)
 plot!(sim3)
 plot!(cumsum(sim4)./(1:10^4))
-plot!(0.0151874*ones(10^4),ylims=c(0.01,0.02))
+plot!(0.0151874*ones(10^4),ylims=(0.01,0.02))
 ```
 
 <img src=https://github.com/EdgyEggplant/AdaptiveIS.jl/raw/master/images/means.png width=600 height=400>
