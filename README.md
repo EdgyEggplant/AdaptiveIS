@@ -38,7 +38,7 @@ sim4 = zeros(10^4)
 [sim4[i] = f(rand(3)) for i=1:10^4]
 ```
 
-A plot of the sample paths of the empirical means and the true mean:
+A plot of the sample paths of the empirical means and the true mean:?
 
 ```julia
 plot(sim1,label="ais")
