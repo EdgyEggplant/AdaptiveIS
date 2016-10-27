@@ -12,7 +12,7 @@ g_dimreduc(z::Vector{Float64},t::Float64,t0::Float64)=cdf(Normal(),z-t)*(1-t0)+e
 ginv(u::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})=(quantile(Normal(),u)+t).*(1-t0)+(-log(u)./(t+1e-5)).*t0
 ginv_dimreduc(u::Vector{Float64},t::Float64,t0::Float64)=(quantile(Normal(),u)+t)*(1-t0)+(-log(u)/(t+1e-5))*t0
 
-h(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})=exp(sum((-t.*(quantile(Normal(),u)+l)+t.^2/2).*(1.-t0)+(-log(abs(t+1e-5))+(1.-t)./(l+1e-5).*log(u)).*t0))
+h(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})=exp(sum((-t.*(quantile(Normal(),u)+l)+t.^2/2).*(1-t0)+(-log(abs(t+1e-5))+(1-t)./(l+1e-5).*log(u)).*t0))
 h_dimreduc(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=exp(sum((t^2/2-t*l-t*quantile(Normal(),u))*(1-t0)+(-log(abs(t+1e-5))+(1-t)/(l+1e-5)*log(u))*t0))
 
 gradh(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})=((t-quantile(Normal(),u)-l).*(1-t0)+(-1./(t+1e-5)-log(u)./(l+1e-5)).*t0)*h(u,t,l,t0)
