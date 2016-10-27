@@ -138,7 +138,7 @@ restriction is reasonable).
 # Example
 ```jldoctest
 julia> using AdaptiveIS
-julia> f(x)=mean(x)>=0.85 ? 1. : 0.
+julia> f(x) = mean(x)>=0.85 ? 1. : 0.
 julia> srand(5)
 julia> ais(f,3)
 Terminal values: μ=0.015014809526721174, θ=1x3 Array{Float64,2}:
