@@ -6,18 +6,33 @@ using Distributions, Plots
 
 export Ais, show, ais, plot!, plot
 
-g(z::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})=cdf(Normal(),z-t).*(1-t0)+exp(-t.*z).*t0
-g_dimreduc(z::Vector{Float64},t::Float64,t0::Float64)=cdf(Normal(),z-t)*(1-t0)+exp(-t*z)*t0
+function g(z::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})
+    [t0[i]==0. ? cdf(Normal(),z[i]-t[i]) : exp(-t[i]*z[i]) for i=1:length(z)]
+end
+function g_dimreduc(z::Vector{Float64},t::Float64,t0::Float64)
+    t0==0. ? cdf(Normal(),z-t) : exp(-t*z)
+end
 
-ginv(u::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})=(quantile(Normal(),u)+t).*(1-t0)+(-log(u)./(t+1e-5)).*t0
-ginv_dimreduc(u::Vector{Float64},t::Float64,t0::Float64)=(quantile(Normal(),u)+t)*(1-t0)+(-log(u)/(t+1e-5))*t0
+function ginv(u::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})
+    [t0[i]==0. ? quantile(Normal(),u[i])+t[i] : -log(u[i])./t[i] for i=1:length(u)]
+end
+function ginv_dimreduc(u::Vector{Float64},t::Float64,t0::Float64)
+    t0==0. ? quantile(Normal(),u)+t : -log(u)/t
+end
 
-h(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})=exp(sum((-t.*(quantile(Normal(),u)+l)+t.^2/2).*(1-t0)+(-log(abs(t+1e-5))+(1-t)./(l+1e-5).*log(u)).*t0))
-h_dimreduc(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=exp(sum((t^2/2-t*l-t*quantile(Normal(),u))*(1-t0)+(-log(abs(t+1e-5))+(1-t)/(l+1e-5)*log(u))*t0))
+function h(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})
+    exp(sum([t0[i]==0. ? t[i]^2/2-t[i]*(quantile(Normal(),u[i])+l[i]) : -log(t[i])+(1-t[i])/l[i]*log(u[i]) for i=1:length(u)]))
+end
+function h_dimreduc(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)
+    exp(sum(t0==0. ? t^2/2-t*(quantile(Normal(),u)+l) : -log(t)+(1-t)/l*log(u)))
+end
 
-gradh(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})=((t-quantile(Normal(),u)-l).*(1-t0)+(-1./(t+1e-5)-log(u)./(l+1e-5)).*t0)*h(u,t,l,t0)
-gradh_dimreduc(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=sum((t-l-quantile(Normal(),u))*(1-t0)+(-1/(t+1e-5)-log(u)/(l+1e-5))*t0)*h_dimreduc(u,t,l,t0)
-
+function gradh(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})
+    [t0[i]==0. ? t[i]-quantile(Normal(),u[i])-l[i] : -1/t[i]-log(u[i])/l[i] for i=1:length(u)]*h(u,t,l,t0)
+end
+function gradh_dimreduc(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)
+    sum(t0==0. ? t-quantile(Normal(),u)-l : -1/t-log(u)/l)*h_dimreduc(u,t,l,t0)
+end
 r(u::Vector{Float64},t::Vector{Float64},f::Function,t0::Vector{Float64})=f(g(ginv(u,t,t0),t0,t0))*h(u,t,t,t0)
 r_dimreduc(u::Vector{Float64},t::Float64,f::Function,t0::Float64)=f(g_dimreduc(ginv_dimreduc(u,t,t0),t0,t0))*h_dimreduc(u,t,t,t0)
 
