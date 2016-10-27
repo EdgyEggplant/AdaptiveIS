@@ -6,17 +6,17 @@ using Distributions, Plots
 
 export Ais, show, ais, plot!, plot
 
-g(z::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})=cdf(Normal(),z-t).*(1.-t0)+exp(-t.*z).*t0
-g_dimreduc(z::Vector{Float64},t::Float64,t0::Float64)=cdf(Normal(),z-t)*(1.-t0)+exp(-t*z)*t0
+g(z::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})=cdf(Normal(),z-t).*(1-t0)+exp(-t.*z).*t0
+g_dimreduc(z::Vector{Float64},t::Float64,t0::Float64)=cdf(Normal(),z-t)*(1-t0)+exp(-t*z)*t0
 
-ginv(u::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})=(quantile(Normal(),u)+t).*(1.-t0)+(-log(u)./(t+1e-5)).*t0
-ginv_dimreduc(u::Vector{Float64},t::Float64,t0::Float64)=(quantile(Normal(),u)+t)*(1.-t0)+(-log(u)/(t+1e-5))*t0
+ginv(u::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})=(quantile(Normal(),u)+t).*(1-t0)+(-log(u)./(t+1e-5)).*t0
+ginv_dimreduc(u::Vector{Float64},t::Float64,t0::Float64)=(quantile(Normal(),u)+t)*(1-t0)+(-log(u)/(t+1e-5))*t0
 
-h(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})=exp(sum((-t.*(quantile(Normal(),u)+l)+t.^2/2.).*(1.-t0)+(-log(abs(t+1e-5))+(1.-t)./(l+1e-5).*log(u)).*t0))
-h_dimreduc(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=exp(sum((t^2/2.-t*l-t*quantile(Normal(),u))*(1.-t0)+(-log(abs(t+1e-5))+(1.-t)/(l+1e-5)*log(u))*t0))
+h(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})=exp(sum((-t.*(quantile(Normal(),u)+l)+t.^2/2).*(1.-t0)+(-log(abs(t+1e-5))+(1.-t)./(l+1e-5).*log(u)).*t0))
+h_dimreduc(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=exp(sum((t^2/2-t*l-t*quantile(Normal(),u))*(1-t0)+(-log(abs(t+1e-5))+(1-t)/(l+1e-5)*log(u))*t0))
 
-gradh(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})=((t-quantile(Normal(),u)-l).*(1.-t0)+(-1./(t+1e-5)-log(u)./(l+1e-5)).*t0)*h(u,t,l,t0)
-gradh_dimreduc(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=sum((t-l-quantile(Normal(),u))*(1.-t0)+(-1/(t+1e-5)-log(u)/(l+1e-5))*t0)*h_dimreduc(u,t,l,t0)
+gradh(u::Vector{Float64},t::Vector{Float64},l::Vector{Float64},t0::Vector{Float64})=((t-quantile(Normal(),u)-l).*(1-t0)+(-1./(t+1e-5)-log(u)./(l+1e-5)).*t0)*h(u,t,l,t0)
+gradh_dimreduc(u::Vector{Float64},t::Float64,l::Float64,t0::Float64)=sum((t-l-quantile(Normal(),u))*(1-t0)+(-1/(t+1e-5)-log(u)/(l+1e-5))*t0)*h_dimreduc(u,t,l,t0)
 
 r(u::Vector{Float64},t::Vector{Float64},f::Function,t0::Vector{Float64})=f(g(ginv(u,t,t0),t0,t0))*h(u,t,t,t0)
 r_dimreduc(u::Vector{Float64},t::Float64,f::Function,t0::Float64)=f(g_dimreduc(ginv_dimreduc(u,t,t0),t0,t0))*h_dimreduc(u,t,t,t0)
@@ -65,11 +65,11 @@ function maxl_dimreduc(l::Float64,lb::Float64,ub::Float64,npart::Int64,sampsize:
     return(maximum(L))
 end
 
-t(z::Vector{Float64},t0::Vector{Float64})=z.*(1.-t0)-z.*t0
-t_dimreduc(z::Vector{Float64},t0::Float64)=sum(z)*(1.-t0)-sum(z)*t0
+t(z::Vector{Float64},t0::Vector{Float64})=z.*(1-t0)-z.*t0
+t_dimreduc(z::Vector{Float64},t0::Float64)=sum(z)*(1-t0)-sum(z)*t0
 
-gradq(l::Vector{Float64},t0::Vector{Float64})=-l.*(1.-t0)+1./(l+1e-5).*t0
-gradq_dimreduc(l::Float64,d::Int64,t0::Float64)=-d*l*(1.-t0)+d/(l+1e-5)*t0
+gradq(l::Vector{Float64},t0::Vector{Float64})=-l.*(1-t0)+1./(l+1e-5).*t0
+gradq_dimreduc(l::Float64,d::Int64,t0::Float64)=-d*l*(1-t0)+d/(l+1e-5)*t0
 
 function saa(u::Vector{Float64},lb::Vector{Float64},ub::Vector{Float64},npart::Int64,f::Function,t0::Vector{Float64})
     d=length(u)
