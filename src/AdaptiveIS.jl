@@ -14,7 +14,7 @@ function g_dimreduc(z::Vector{Float64},t::Float64,t0::Float64)
 end
 
 function ginv(u::Vector{Float64},t::Vector{Float64},t0::Vector{Float64})
-    [t0[i]==0. ? quantile(Normal(),u[i])+t[i] : -log(u[i])./t[i] for i=1:length(u)]
+    [t0[i]==0. ? quantile(Normal(),u[i])+t[i] : -log(u[i])/t[i] for i=1:length(u)]
 end
 function ginv_dimreduc(u::Vector{Float64},t::Float64,t0::Float64)
     t0==0. ? quantile(Normal(),u)+t : -log(u)/t
