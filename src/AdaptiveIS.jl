@@ -173,7 +173,7 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
     if sampsize<1
         error("sampsize should be positive.")
     end
-    if accel!="directsub" && accel!="sa" && accel!="saa"
+    if accel!="none" && accel!="directsub" && accel!="sa" && accel!="saa"
         error("The acceleration method specified is not valid. Choose from none, directsub, sa, and saa.")
     end
     
