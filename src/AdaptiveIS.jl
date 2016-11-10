@@ -161,13 +161,23 @@ Terminal values: μ=0.015014809526721174, θ=1x3 Array{Float64,2}:
 ```
 """
 function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,npart::Int64=5,sampsize::Int64=10^2,accel::AbstractString="none",dimreduc::Bool=false)
-    if dimreduc==false
     if d<1
         error("The dimension of the problem should be positive.")
     end
     if n<1
         error("n should be positive.")
     end
+    if npart<2
+        error("npart should be at least 2.")
+    end
+    if sampsize<1
+        error("sampsize should be positive.")
+    end
+    if accel!="directsub" && accel!="sa" && accel!="saa"
+        error("The acceleration method specified is not valid. Choose from none, directsub, sa, and saa.")
+    end
+    
+    if dimreduc==false
     if length(t0)!=d
         error("length(t0) should match the dimension of the problem.")
     end
@@ -189,12 +199,6 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
     if sum((lb.*t0).>0.)!=sum(t0)
         error("Whenever t0 is 1, lb should be positive.")
     end
-    if npart<2
-        error("npart should be at least 2.")
-    end
-    if sampsize<1
-        error("sampsize should be positive.")
-    end
     
     rsamp=zeros(n)
     θ=repmat(t0,1,n+1)
@@ -210,7 +214,7 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
         θbar=cumsum(θ[:,1:n],2)./repmat((1:n)',d,1)
         return(Ais(μ,θbar',t0))
         
-    elseif accel=="directsub" || accel=="sa" || accel=="saa"
+    else
         τ=0
         u=0.
         temp=0.
@@ -244,18 +248,9 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
         μ=cumsum(rsamp)./(1:n)
         θbar=hcat(repmat(t0,1,τ),cumsum(θ[:,τ+1:n],2)./repmat((1:n-τ)',d,1))
         return(Ais(μ,θbar',λ))
-        
-    else
-        error("The acceleration method specified is not valid. Choose from none, directsub, sa, and saa.")
     end
     
     elseif dimreduc==true
-    if d<1
-        error("The dimension of the problem should be positive.")
-    end
-    if n<1
-        error("n should be positive.")
-    end
     t0=convert(Float64,t0[1])
     if t0^2!=t0
         error("When using dimension reduction, t0 should be either 0 or 1.")
@@ -267,12 +262,6 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
     end
     if t0==1. && lb<=0.
         error("When using dimension reduction, if t0 is 1,then lb should be positive.")
-    end
-    if npart<2
-        error("npart should be at least 2.")
-    end
-    if sampsize<1
-        error("sampsize should be positive.")
     end
     
     rsamp=zeros(n)
@@ -289,7 +278,7 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
         θbar=repmat(cumsum(θ[1:n])./(1:n),1,1)
         return(Ais(μ,θbar,ones(1)*t0))
         
-    elseif accel=="directsub" || accel=="sa" || accel=="saa"
+    else
         τ=0
         u=0.
         temp=0.
@@ -323,9 +312,6 @@ function ais(f::Function,d::Int64;n::Int64=10^4,t0=zeros(d),lb=t0-0.5,ub=t0+0.5,
         μ=cumsum(rsamp)./(1:n)
         θbar=repmat(vcat(t0*ones(τ),cumsum(θ[τ+1:n])./(1:n-τ)),1,1)
         return(Ais(μ,θbar,ones(1)*λ))
-        
-    else
-        error("The acceleration method specified is not valid. Choose from none, directsub, sa, and saa.")
     end
     end
 end
