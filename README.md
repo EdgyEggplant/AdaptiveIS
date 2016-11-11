@@ -50,7 +50,7 @@ plot!(0.0151874*ones(10^4),ylims=(0.01,0.02),label="true")
 
 <img src=https://github.com/EdgyEggplant/AdaptiveIS.jl/raw/master/images/means.PNG width=600 height=400>
 
-The sample path of the importance sampling parameter can also be plotted:
+The sample path of the importance sampling parameter can also be plotted. Each series corresponds to one dimension of the importance sampling parameter.
 
 ```julia
 plot(sim1.θ,label="θ")
