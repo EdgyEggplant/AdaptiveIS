@@ -114,7 +114,7 @@ type Ais
 end
 
 function Base.show(io::IO,ais::Ais)
-    print(io,"Terminal values: μ=$(ais.μ[end]), θ=$(ais.θ[end,:])")
+    print(io,"Terminal values: μ[end]=$(ais.μ[end]), θ[end,:]=$(ais.θ[end,:])")
 end
 
 """
@@ -156,7 +156,7 @@ julia> using AdaptiveIS
 julia> f(x) = mean(x)>=0.85 ? 1. : 0.
 julia> srand(5)
 julia> ais(f,3)
-Terminal values: μ=0.015014809526721174, θ=1x3 Array{Float64,2}:
+Terminal values: μ[end]=0.015014809526721174, θ[end,:]=1x3 Array{Float64,2}:
  0.226725  0.234437  0.230236
 ```
 """
