@@ -58,4 +58,4 @@ plot(sim1.θ,label="θ")
 
 <img src=https://github.com/EdgyEggplant/AdaptiveIS.jl/raw/master/images/theta.PNG width=600 height=400>
 
-The importance sampling distribution is the joint pdf of independent exponential and/or normal (default) random variables with unit standard deviation.
+The importance sampling distribution is the joint pdf of independent exponential and/or normal (default) random variables with unit standard deviation. Each dimension of the importance sampling parameter corresponds to the rate parameter in the exponential cas eand the mean in the normal case.
